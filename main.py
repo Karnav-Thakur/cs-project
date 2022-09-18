@@ -1,13 +1,18 @@
 import os
 import tkinter as tk
 from PIL import Image,ImageTk
+from helpers import helper
 
 window = tk.Tk()
 # window.maxsize(width=1366,height=728)
 window.attributes('-fullscreen',True)
 screenwidth = window.winfo_screenwidth()
 screenheight = window.winfo_screenheight()
-dimensions = (screenwidth+10,screenheight+10)
+dimensions = (screenwidth,screenheight)
+
+y = 100
+gap = 25
+
 
 bg = ImageTk.PhotoImage(Image.open('templates/bg.png').resize(dimensions))
 
@@ -36,9 +41,6 @@ class Patient:
         pass
 
     def add_patient(self): #add new patient
-        
-        y = 100
-        gap = 25
 
         name = tk.Label(window,text='Name')
         canvas.create_window(screenwidth//2,y+gap,window=name)
@@ -98,10 +100,12 @@ class Patient:
         
     def search_patient(self): #search for a new patient
         search = tk.Label(window,text='Enter name of patient')
-        search.pack()
+        # search.pack()
+        canvas.create_window(screenwidth//2,y+gap,window=search)
 
         search_box = tk.Text(window,height=1,width=20)
-        search_box.pack()
+        # search_box.pack()
+        canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
 
         def search():
             name = search_box.get('1.0','end-1c')
@@ -109,13 +113,9 @@ class Patient:
 
 
         search_button = tk.Button(window,text='Search',command=search)
-        search_button.pack()
-
-
-
-
-
-
+        # search_button.pack()
+        canvas.create_window(screenwidth//2,y+3*gap,window=search_button)
+        
 class Doctor:
     
     def doc_list(self): # get the list of all the doctors in the database
