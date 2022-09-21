@@ -143,7 +143,7 @@ class Patient:
                 ms.add_patient(*data)
             except Exception as e:
                 messagebox.showerror(title='Error Occured',message=e)
-            
+                return
 
             # print(name_box.get('1.0','end-1c')) # this is how to get data (temoporary until database added)
 
@@ -162,8 +162,26 @@ class Patient:
         canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
 
         def search():
-            name = search_box.get('1.0','end-1c')
-            print(name)
+            text = search_box.get('1.0','end-1c').split(' ')
+            if text == ['']:
+                messagebox.showwarning(title='Error Occured',message='Please enter name of the patient to search')
+                return
+            
+            results = ms.search_patient(*text)
+
+
+            if results == []:
+                messagebox.showerror(title="Error Occured",message='Patient Not Found')
+                return
+
+            label = tk.Label(window,text=f'Results Found\n {results}')
+            
+            canvas.create_window(screenwidth//2,y+4*gap,window=label)
+
+
+
+
+
 
 
         search_button = tk.Button(window,text='Search',command=search)
@@ -176,11 +194,78 @@ class Doctor:
         pass
 
     def free_doc(self): #get the list of available doctors
-        pass
+        
+        label = tk.Label(window,text='Click the button to find out which doctors are free')
+        canvas.create_window(screenwidth//2,y+gap,window=label)
+
+        results = ms.free_doc()
+
+        if results == []:
+            messagebox.showerror(title="Error Occured",message='doctor Not Found')
+            return
+
+        clean_results = []
+
+        for i in results:
+            start_time = str(i[8])
+            end_time = str(i[9])
+            new_doc_data = (i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7],start_time,end_time)
+            clean_results.append(new_doc_data)
+
+        def cmd():
+            result = tk.Label(window,text=f'{new_doc_data}')
+            canvas.create_window(screenwidth//2,y+3*gap,window=result)
+
+        button = tk.Button(window,text='Search',command=cmd)
+        canvas.create_window(screenwidth//2,y+2*gap,window=button)
+
+
+    def search_doc(self):
+        search = tk.Label(window,text='Enter name of doctor')
+        # search.pack()
+        canvas.create_window(screenwidth//2,y+gap,window=search)
+
+        search_box = tk.Text(window,height=1,width=20)
+        # search_box.pack()
+        canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
+
+        def search():
+            text = search_box.get('1.0','end-1c').split(' ')
+            if text == ['']:
+                messagebox.showwarning(title='Error Occured',message='Please enter name of the doctor to search')
+                return
+            
+            results = ms.search_doc(*text)
+
+            if results == []:
+                messagebox.showerror(title="Error Occured",message='doctor Not Found')
+                return
+
+            clean_results = []
+
+            for i in results:
+                start_time = str(i[8])
+                end_time = str(i[9])
+                new_doc_data = (i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7],start_time,end_time)
+                clean_results.append(new_doc_data)
+
+            
+
+            label = tk.Label(window,text=f'Results Found\n {clean_results}')
+            
+            canvas.create_window(screenwidth//2,y+4*gap,window=label)
+
+
+
+
+
+
+
+        search_button = tk.Button(window,text='Search',command=search)
+        # search_button.pack()
+        canvas.create_window(screenwidth//2,y+3*gap,window=search_button)
 
     def new_doc(self): #add a new doctor
-        y = 100
-        gap = 25
 
         first_name = tk.Label(window,text='First Name')
         canvas.create_window(screenwidth//2,y+gap,window=first_name)
@@ -273,6 +358,7 @@ class Doctor:
                 ms.add_doc(*data)
             except Exception as e:
                 messagebox.showerror(title='Error Occured',message=e)
+                return
             
 
             # print(name_box.get('1.0','end-1c')) # this is how to get data (temoporary until database added)
@@ -348,6 +434,8 @@ def choice(event):
                 doctor.free_doc()
             elif meths.get() == 'new_doc':
                 doctor.new_doc()
+            elif meths.get() == 'search_doc':
+                doctor.search_doc()
 
 
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)

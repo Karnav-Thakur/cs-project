@@ -1,6 +1,6 @@
-from ast import ExceptHandler
+import datetime
 import mysql.connector
-
+import pytz
 class MySQL:
     def __init__(self,host,user,db,pw):
         self.db = mysql.connector.connect(host=host,user=user,passwd=pw,database=db)
@@ -25,19 +25,21 @@ class MySQL:
         except mysql.connector.errors.ProgrammingError:
             pass
 
-    def search_doc(self,ppin):
-        self.c.execute('SELECT * FROM doctor WHERE ppin = %s',(ppin,))
-        for x in self.c:
-            return x
-
-    def search_patient(self,name):
-        self.c.execute('SELECT * FROM patient WHERE first_namee= %s',(name,))
+    def search_doc(self,*name):
+        self.c.execute('SELECT * FROM doctor WHERE first_name = %s AND last_name = %s',name)
         data = []
         for x in self.c:
             data.append(x)
         return data
 
-    def add_patient(self,*args):#fname,lname,age,gender,phone_number,email,types,disease,last_visit):
+    def search_patient(self,*name):
+        self.c.execute('SELECT * FROM patient WHERE first_name= %s AND last_name = %s',name)
+        data = []
+        for x in self.c:
+            data.append(x)
+        return data
+
+    def add_patient(self,*args):
         self.c.execute('SELECT * FROM patient')
 
         for x in self.c:
@@ -47,6 +49,18 @@ class MySQL:
         self.c.execute('INSERT INTO patient (first_name,last_name,age,gender,phone_number,email,type,disease,last_visit) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',args)
         self.db.commit()
 
+    def free_doc(self):
+        tz_india = pytz.timezone('Asia/Kolkata')
+        
+        now = datetime.datetime.now(tz_india)
+                
+        self.c.execute('SELECT * FROM doctor WHERE shift_end < %s',(now,))
+        data = []
+
+        for x in self.c:
+            data.append(x)
+        
+        return data
     
     def add_doc(self,*args):
         self.c.execute('SELECT * FROM doctor')
@@ -54,12 +68,13 @@ class MySQL:
             if x[1] ==  args[4]:
                 return Exception("Please use a different mobile number")
         
-        self.c.execute('INSERT INTO doctor (ppin,first_name,last_name,age,gender,phone_number,email ,speciality,shift_start time ,shift_end time)',args)
+        self.c.execute('INSERT INTO doctor (ppin,first_name,last_name,age,gender,phone_number,email ,speciality,shift_start time ,shift_end time) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',args)
                 
 
 
 if __name__ == "__main__":
     ms = MySQL(host='localhost',user='root',db='hms',pw='12345678')
-    ms.start_new()
+    # ms.start_new()
     # print(ms.search_doc(table="doctor",ppin=1))
-    print(ms.add_doc())
+    # print(ms.add_doc())
+    print(ms.free_doc())
