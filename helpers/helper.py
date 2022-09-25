@@ -1,6 +1,8 @@
 import datetime
+from sqlite3 import ProgrammingError
 import mysql.connector
 import pytz
+
 class MySQL:
     def __init__(self,host,user,db,pw):
         self.db = mysql.connector.connect(host=host,user=user,passwd=pw,database=db)
@@ -25,6 +27,11 @@ class MySQL:
         except mysql.connector.errors.ProgrammingError:
             pass
 
+        try:
+            self.c.execute('CREATE TABLE history (id int PRIMARY KEY AUTO_INCREMENT, patient_id int, FOREIGN KEY(patient_id) REFERENCES patient(id), disease VARCHAR(45), last_visit date);')
+        except mysql.connector.errors.ProgrammingError:
+            pass
+
     def search_doc(self,*name):
         self.c.execute('SELECT * FROM doctor WHERE first_name = %s AND last_name = %s',name)
         data = []
@@ -39,15 +46,38 @@ class MySQL:
             data.append(x)
         return data
 
-    def add_patient(self,*args):
-        self.c.execute('SELECT * FROM patient')
+    def add_patient(self,visited_before,*args):
+        self.c.execute('SELECT * FROM patient ')
+
+        correct_patient = []
 
         for x in self.c:
-            if x[5] == int(args[4]):
-                return Exception('Please use a different mobile number')
+            if args[0] == x[1] and args[1] == x[2]:
+                correct_patient.append(x)
+                break
+        
+        print(correct_patient)
+            
+        
+
+        if visited_before == 1:
+            self.c.execute('INSERT INTO history (patient_id,disease,last_visit) VALUES (%s,%s,%s)',(correct_patient[0][0],args[7],args[8]))
+            self.c.execute('UPDATE patient SET disease = %s , last_visit = %s, type = %s WHERE id = %s',(args[7],args[8],args[6], correct_patient[0][0]))
+            self.db.commit()
+            return
         
         self.c.execute('INSERT INTO patient (first_name,last_name,age,gender,phone_number,email,type,disease,last_visit) VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s)',args)
         self.db.commit()
+
+    def history(self,patient):
+        self.c.execute('SELECT * FROM history WHERE patient_id = %s',(int(patient),))
+
+        result = []
+
+        for x in self.c:
+            result.append(x)
+        
+        return result
 
     def free_doc(self):
         tz_india = pytz.timezone('Asia/Kolkata')
@@ -62,6 +92,14 @@ class MySQL:
         
         return data
     
+    def docs(self):
+        self.c.execute("SELECT * FROM doctor")
+        data = []
+        for x in self.c:
+            data.append(x)
+        
+        return data
+
     def add_doc(self,*args):
         self.c.execute('SELECT * FROM doctor')
         for x in self.c:
@@ -77,4 +115,4 @@ if __name__ == "__main__":
     # ms.start_new()
     # print(ms.search_doc(table="doctor",ppin=1))
     # print(ms.add_doc())
-    print(ms.free_doc())
+    # print(ms.free_doc())

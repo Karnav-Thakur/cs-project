@@ -6,7 +6,6 @@ from PIL import Image,ImageTk
 from helpers import helper
 
 window = tk.Tk()
-# window.maxsize(width=1366,height=728)
 window.attributes('-fullscreen',True)
 screenwidth = window.winfo_screenwidth()
 screenheight = window.winfo_screenheight()
@@ -19,9 +18,12 @@ ms = helper.MySQL('localhost','root','hms','12345678')
 
 bg = ImageTk.PhotoImage(Image.open('templates/bg.png').resize(dimensions))
 
+
+
 canvas = tk.Canvas(window,width=dimensions[0],height=dimensions[1])
 canvas.pack(fill='both',expand=True)
 canvas.create_image(0,0,image=bg,anchor='nw')
+
 
 def clear_item():
     for item,ids in enumerate(canvas.find_all()):
@@ -29,25 +31,88 @@ def clear_item():
             continue
         canvas.delete(ids)
 
-# clear_item()
 
 
 def recover_wid():
-    # button1.pack(anchor='nw')
     canvas.pack(fill='both',expand=True)
     canvas.create_window(0,0,anchor='nw',window=button1)
     canvas.create_window(screenwidth//2,0,anchor='n',window=dropdown)  
 
-    # dropdown.pack(anchor='n')
 
 
 class Patient:
     
-    def history(): #check the medical history of the patient with our hospital
-        pass
+    def history(self): #check the medical history of the patient with our hospital
+        search = tk.Label(window,text='Enter name of patient')
+        canvas.create_window(screenwidth//2,y+gap,window=search)
 
-    def last_visited(): #check when the patient last visited
-        pass
+        search_box = tk.Text(window,height=1,width=20)
+        canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
+
+        def search():
+            text = search_box.get('1.0','end-1c').split(' ')
+            if text == ['']:
+                messagebox.showwarning(title='Error Occured',message='Please enter name of the patient to search')
+                return
+            
+            results = ms.search_patient(*text)
+
+            if results == []:
+                messagebox.showerror(title="Error Occured",message='Patient Not Found')
+                return
+            
+            patient_id = results[0][0]       
+
+            history = ms.history(patient_id)
+
+            clean_history = []
+
+            for x in history:
+                new_x = (x[0],x[1],x[2],str(x[3]))
+                clean_history.append(new_x)
+
+            label = tk.Label(window,text=f'Results Found\n {clean_history}')
+            
+            canvas.create_window(screenwidth//2,y+4*gap,window=label)
+
+        search_button = tk.Button(window,text='Search',command=search)
+        canvas.create_window(screenwidth//2,y+3*gap,window=search_button)
+
+            
+
+    def last_visited(self): #check when the patient last visited
+        search = tk.Label(window,text='Enter name of patient')
+        canvas.create_window(screenwidth//2,y+gap,window=search)
+
+        search_box = tk.Text(window,height=1,width=20)
+        canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
+
+        def search():
+            text = search_box.get('1.0','end-1c').split(' ')
+            if text == ['']:
+                messagebox.showwarning(title='Error Occured',message='Please enter name of the patient to search')
+                return
+            
+            results = ms.search_patient(*text)
+            clean_result = []
+
+            if results == []:
+                messagebox.showerror(title="Error Occured",message='Patient Not Found')
+                return
+
+            for i in results:
+                last_visit = str(i[9])
+                new_doc_data = (i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7],i[8],last_visit)
+                clean_result.append(new_doc_data)
+
+
+            label = tk.Label(window,text=f'Results Found\n {clean_result}')
+            
+            canvas.create_window(screenwidth//2,y+4*gap,window=label)
+
+        search_button = tk.Button(window,text='Search',command=search)
+        canvas.create_window(screenwidth//2,y+3*gap,window=search_button)
+
 
     def add_patient(self): #add new patient
 
@@ -117,15 +182,16 @@ class Patient:
                 messagebox.showerror('Error Occured', 'One or more arguments are put incorrectly')
                 return
 
-            first_name_box_text = first_name_box.get('1.0','end-1c').title()
-            last_name_box_text = last_name_box.get('1.0','end-1c').title()
-            age_box_text = int(age_box.get('1.0','end-1c'))
-            gender_box_text = gender_box.get('1.0','end-1c').title()
-            pn_box_text = int(pn_box.get('1.0','end-1c'))
-            mail_box_text = mail_box.get('1.0','end-1c').title()
-            typ_box_text = typ_box.get('1.0','end-1c').title()
-            disease_box_text = disease_box.get('1.0','end-1c').title()
-            visit_box_text = datetime.datetime.strptime(visit_box.get('1.0','end-1c'),'%d/%m/%Y')
+            first_name_box_text = first_name_box.get('1.0','end-1c').title().strip()
+            last_name_box_text = last_name_box.get('1.0','end-1c').title().strip()
+            age_box_text = int(age_box.get('1.0','end-1c').strip())
+            gender_box_text = gender_box.get('1.0','end-1c').title().strip()
+            pn_box_text = int(pn_box.get('1.0','end-1c').strip())
+            mail_box_text = mail_box.get('1.0','end-1c').title().strip()
+            typ_box_text = typ_box.get('1.0','end-1c').title().strip()
+            disease_box_text = disease_box.get('1.0','end-1c').title().strip()
+            visit_box_text = datetime.datetime.strptime(visit_box.get('1.0','end-1c').strip(),'%d/%m/%Y')
+            visited_before = intvar.get()
 
             data = [first_name_box_text,last_name_box_text,age_box_text,gender_box_text,pn_box_text,mail_box_text,typ_box_text,disease_box_text,visit_box_text]
 
@@ -133,32 +199,33 @@ class Patient:
                 messagebox.showerror(title="Error Occured",message='Text arguments have exceeded the word limit')
         
             label = tk.Label(window,text='Added Patient in Database')
-            # label.pack()
             canvas.create_window(screenwidth//2,y+19*gap,window=label)
             label.after(3000,func=clear_item)
             ok_button.after(4000,func=recover_wid)
 
             
-            try:
-                ms.add_patient(*data)
-            except Exception as e:
-                messagebox.showerror(title='Error Occured',message=e)
-                return
+            # try:
+            ms.add_patient(visited_before,*data)
+            # except Exception as e:
+            #     print(e)
+            #     messagebox.showerror(title='Error Occured',message=e)
+            #     return
 
-            # print(name_box.get('1.0','end-1c')) # this is how to get data (temoporary until database added)
 
         ok_button = tk.Button(window,text='Add Patient',command=ok)
-        ok_button.pack()
+        # ok_button.pack()
         canvas.create_window(screenwidth//2,y+20*gap,window=ok_button)
+
+        visited_before = tk.Checkbutton(window,text='Visited Before',onvalue=1,offvalue=0,variable=intvar,height=1,width=20)
+        print(intvar.get())
+        canvas.create_window(screenwidth//2,y+21*gap,window=visited_before)
         
         
     def search_patient(self): #search for a new patient
         search = tk.Label(window,text='Enter name of patient')
-        # search.pack()
         canvas.create_window(screenwidth//2,y+gap,window=search)
 
         search_box = tk.Text(window,height=1,width=20)
-        # search_box.pack()
         canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
 
         def search():
@@ -185,13 +252,32 @@ class Patient:
 
 
         search_button = tk.Button(window,text='Search',command=search)
-        # search_button.pack()
         canvas.create_window(screenwidth//2,y+3*gap,window=search_button)
         
 class Doctor:
     
     def doc_list(self): # get the list of all the doctors in the database
-        pass
+        label = tk.Label(window,text='Click the button to get list of all doctors in the hospital')
+        canvas.create_window(screenwidth//2,y+gap,window=label)
+
+        clean_results = []
+
+        def cmd():
+            results = ms.docs()
+            for i in results:
+                start_time = str(i[8])
+                end_time = str(i[9])
+                new_doc_data = (i[0],i[1],i[2],i[3],i[4],i[5],i[6],i[7],start_time,end_time)
+                clean_results.append(new_doc_data)
+            lab = tk.Label(window,text=f'{clean_results}')
+            canvas.create_window(screenwidth//2, y+3*gap,window=lab)
+
+
+
+        button = tk.Button(window,text='Click Me',command=cmd)
+        canvas.create_window(screenwidth//2,y+2*gap,window=button)
+
+
 
     def free_doc(self): #get the list of available doctors
         
@@ -222,11 +308,9 @@ class Doctor:
 
     def search_doc(self):
         search = tk.Label(window,text='Enter name of doctor')
-        # search.pack()
         canvas.create_window(screenwidth//2,y+gap,window=search)
 
         search_box = tk.Text(window,height=1,width=20)
-        # search_box.pack()
         canvas.create_window(screenwidth//2,y+2*gap,window=search_box)
 
         def search():
@@ -262,7 +346,6 @@ class Doctor:
 
 
         search_button = tk.Button(window,text='Search',command=search)
-        # search_button.pack()
         canvas.create_window(screenwidth//2,y+3*gap,window=search_button)
 
     def new_doc(self): #add a new doctor
@@ -349,7 +432,6 @@ class Doctor:
                 messagebox.showerror(title="Error Occured",message='Text arguments have exceeded the word limit')
 
             label = tk.Label(window,text='Added Doctor in Database')
-            # label.pack()
             canvas.create_window(screenwidth//2,y+19*gap,window=label)
             label.after(3000,func=clear_item)
             ok_button.after(4000,func=recover_wid)
@@ -361,7 +443,6 @@ class Doctor:
                 return
             
 
-            # print(name_box.get('1.0','end-1c')) # this is how to get data (temoporary until database added)
 
         ok_button = tk.Button(window,text='Add Doctor',command=ok)
         ok_button.pack()
@@ -415,7 +496,6 @@ def choice(event):
 
 
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
-        # methods_drop.pack()
         canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
 
     elif stringvar.get() == 'Doctor':
@@ -439,10 +519,12 @@ def choice(event):
 
 
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
-        # methods_drop.pack()
         canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
 
+    elif stringvar.get() == 'Home':
+        test2 = tk.Label(window,text='Made by- Kartavya Bang \nClass - 12th A',font=('Franklin Gothic Demi',15))
 
+        canvas.create_window(screenwidth-200,screenheight,window=test2)
 
 mods = []
 for i in os.listdir('./modules'):
@@ -451,19 +533,17 @@ for i in os.listdir('./modules'):
 
 mods.sort()
 
-stringvar = tk.StringVar(window,mods[0])
-
+stringvar = tk.StringVar(window,mods[2])
+intvar = tk.IntVar(window)
 button1 = tk.Button(window,command=winquit, text = "Exit",font=('Segoe UI',18,'bold'))
 
-# button1.pack(anchor='nw')
 
 canvas.create_window(0,0,anchor='nw',window=button1)
 
 dropdown = tk.OptionMenu(window,stringvar,*mods,command=choice)
-# dropdown.pack(anchor='n')
 canvas.create_window(screenwidth//2,0,anchor='n',window=dropdown)  
-# limg = tk.Label(window,image=bg)
-# limg.pack()
+
+choice('opt')
 
 window.mainloop()
 
