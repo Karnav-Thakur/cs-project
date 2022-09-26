@@ -449,9 +449,22 @@ class Doctor:
         canvas.create_window(screenwidth//2,y+20*gap,window=ok_button)
 
 class Admin:
-    def __init__(self,user,password):
-        self.user = user
-        self.pw = password
+    
+    def user(self):
+        cred = tk.Label(window,text='Enter admin details, sepereate username and password by a space')
+        canvas.create_window(screenwidth//2,y,window=cred)
+
+        cred_text = tk.Text(window,height=1,width=20)
+        canvas.create_window(screenwidth//2,y+gap,window=cred_text)
+
+        def cmd():
+            pass
+
+        ok_button = tk.Button(window,text='Login',command=cmd)
+        canvas.create_window(screenwidth//2,y+2*gap,window=ok_button)
+        
+
+
 
 class Prescription:
     def __init__(self,name,date,medicine):
@@ -522,9 +535,35 @@ def choice(event):
         canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
 
     elif stringvar.get() == 'Home':
-        test2 = tk.Label(window,text='Made by- Kartavya Bang \nClass - 12th A',font=('Franklin Gothic Demi',15))
 
-        canvas.create_window(screenwidth-200,screenheight,window=test2)
+        main = tk.Label(window, text= 'HOSPITAL MANAGEMENT SYSTEM',font=('Franklin Gothic Demi',25))
+        canvas.create_window(screenwidth//2,screenheight//2,window=main)
+
+        made_by = tk.Label(window,text='Made by- Kartavya Bang \nClass - 12th A',font=('Franklin Gothic Demi',15))
+        canvas.create_window(screenwidth-200,screenheight-23,window=made_by)
+
+    elif stringvar.get() == 'Admin':
+        admin = Admin()
+
+        methods = [attr for attr in dir(Admin) if attr.startswith('__') is False]
+
+        meths = tk.StringVar(window,methods[0])
+
+        def cho(event):
+            clear_item()
+            recover_wid()
+            if meths.get() == 'user':
+                admin.user()
+            # elif meths.get() == 'history':
+            #     patient.history()
+            # elif meths.get() == 'last_visited':
+            #     patient.last_visited()
+            # elif meths.get() == 'search_patient':
+            #     patient.search_patient()
+
+
+        methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
+        canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
 
 mods = []
 for i in os.listdir('./modules'):
