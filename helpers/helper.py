@@ -1,5 +1,5 @@
 import datetime
-from sqlite3 import ProgrammingError
+from tkinter import messagebox
 import mysql.connector
 import pytz
 
@@ -32,6 +32,11 @@ class MySQL:
         except mysql.connector.errors.ProgrammingError:
             pass
 
+        try:
+            self.c.execute('CREATE TABLE admin (name VARCHAR(45), pass VARCHAR(45));')
+        except mysql.connector.errors.ProgrammingError:
+            pass
+
     def search_doc(self,*name):
         self.c.execute('SELECT * FROM doctor WHERE first_name = %s AND last_name = %s',name)
         data = []
@@ -58,7 +63,7 @@ class MySQL:
         
         print(correct_patient)
             
-        
+
 
         if visited_before == 1:
             self.c.execute('INSERT INTO history (patient_id,disease,last_visit) VALUES (%s,%s,%s)',(correct_patient[0][0],args[7],args[8]))
@@ -107,12 +112,24 @@ class MySQL:
                 return Exception("Please use a different mobile number")
         
         self.c.execute('INSERT INTO doctor (ppin,first_name,last_name,age,gender,phone_number,email ,speciality,shift_start time ,shift_end time) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)',args)
-                
+
+    def check_admin(self,*cred):
+        self.c.execute('SELECT * FROM admin WHERE name= %s AND pass = %s',cred)
+        result = []
+        for x in self.c:
+            result.append(x)
+        
+        if result == []:        
+            return 0
+        
+        else:
+            return x
+
 
 
 if __name__ == "__main__":
     ms = MySQL(host='localhost',user='root',db='hms',pw='12345678')
-    # ms.start_new()
+    ms.start_new()
     # print(ms.search_doc(table="doctor",ppin=1))
     # print(ms.add_doc())
     # print(ms.free_doc())

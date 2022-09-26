@@ -458,7 +458,12 @@ class Admin:
         canvas.create_window(screenwidth//2,y+gap,window=cred_text)
 
         def cmd():
-            pass
+            result = ms.check_admin(*cred_text.get('1.0','end-1c').split(' '))
+            if result == 0:
+                messagebox.showerror(title="Error Occured",message='Username or Password is incorrect')
+            else:
+                label = tk.Label(window,text='Login Successful')
+                canvas.create_window(screenwidth//2,y+3*gap,window=label)
 
         ok_button = tk.Button(window,text='Login',command=cmd)
         canvas.create_window(screenwidth//2,y+2*gap,window=ok_button)
