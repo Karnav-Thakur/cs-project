@@ -1,7 +1,7 @@
 import datetime
 import os
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import messagebox,ttk
 from PIL import Image,ImageTk
 from helpers import helper
 
@@ -472,10 +472,39 @@ class Admin:
 
 
 class Prescription:
-    def __init__(self,name,date,medicine):
-        self.name = name
-        self.date = date
-        self.medicine = medicine
+    def suggest_meds(self):
+        dis = tk.Label(window,text='Enter Disease')
+        canvas.create_window(screenwidth//2,y,window=dis)
+
+        dis_box = tk.Text(window,height=1,width=20)
+        canvas.create_window(screenwidth//2,y+gap,window=dis_box)
+
+        def cmd():
+            print(dis_box.get('1.0','end-1c').lower())
+            result = ms.suggest_medicine(dis_box.get('1.0','end-1c').lower())
+
+            if result == [] or not result:
+                messagebox.showerror(title='Error Occured',message='No Medicine with that disease was found, please enter the medicine name in the database')
+            else:
+                rows = len(result)
+                columns = len(result[0])
+
+                for i in range(rows):
+                    for j in range(columns):
+                        
+                        table = tk.Entry(window, width=20, fg='blue',
+                                    font=('Arial',16,'bold'))
+                        
+
+
+                        table.grid(row=i, column=j,sticky=tk.NSEW)
+                        # canvas.create_window(0,y+2*gap,row=)
+                        table.insert(tk.END, result[i][j])
+        
+        ok_button = tk.Button(window,text='Suggest',command=cmd)
+        canvas.create_window(screenwidth//2,y+2*gap,window=ok_button)
+        
+        
 
 class Report(Patient):
     pass
@@ -565,6 +594,23 @@ def choice(event):
             #     patient.last_visited()
             # elif meths.get() == 'search_patient':
             #     patient.search_patient()
+
+
+        methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
+        canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
+
+    elif stringvar.get() == 'Prescription':
+        pres = Prescription()
+
+        methods = [attr for attr in dir(pres) if attr.startswith('__') is False]
+        
+        meths = tk.StringVar(window,methods[0])
+
+        def cho(event):
+            clear_item()
+            recover_wid()
+            if meths.get() == 'suggest_meds':
+                pres.suggest_meds()
 
 
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)

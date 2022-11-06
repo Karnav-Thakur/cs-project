@@ -22,7 +22,7 @@ class MySQL:
             pass
             
         try:
-            self.c.execute('CREATE TABLE medicine (id int PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45), dose VARCHAR(10), price bigint);')
+            self.c.execute('CREATE TABLE medicine (id int PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45), dose VARCHAR(10), price bigint, disease VARCHAR(50));')
             # self.c.execute('CREATE TABLE report (id int PRIMARY KEY AUTO_INCREMENT, patient_first_name VARCHAR(45), patient_last_name VARCHAR(45), doctor_first_name VARCHAR(45), doctor_last_name VARCHAR(45), ')
         except mysql.connector.errors.ProgrammingError:
             pass
@@ -61,7 +61,6 @@ class MySQL:
                 correct_patient.append(x)
                 break
         
-        print(correct_patient)
             
 
 
@@ -124,6 +123,16 @@ class MySQL:
         
         else:
             return x
+
+    def suggest_medicine(self,disease):
+        self.c.execute('SELECT * FROM medicine WHERE disease = %s ',(disease,))
+
+        meds = []
+
+        for x in self.c:
+            meds.append(x)
+        
+        return meds
 
 
 
