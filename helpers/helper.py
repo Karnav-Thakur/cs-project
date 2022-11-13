@@ -23,7 +23,6 @@ class MySQL:
             
         try:
             self.c.execute('CREATE TABLE medicine (id int PRIMARY KEY AUTO_INCREMENT, name VARCHAR(45), dose VARCHAR(10), price bigint, disease VARCHAR(50));')
-            # self.c.execute('CREATE TABLE report (id int PRIMARY KEY AUTO_INCREMENT, patient_first_name VARCHAR(45), patient_last_name VARCHAR(45), doctor_first_name VARCHAR(45), doctor_last_name VARCHAR(45), ')
         except mysql.connector.errors.ProgrammingError:
             pass
 
@@ -125,6 +124,7 @@ class MySQL:
             return x
 
     def suggest_medicine(self,disease):
+
         self.c.execute('SELECT * FROM medicine WHERE disease = %s ',(disease,))
 
         meds = []
@@ -134,11 +134,16 @@ class MySQL:
         
         return meds
 
+    def add_med(self,*args):
+        self.c.execute('SELECT * FROM medicine WHERE name = %s',(args[0],))
+        if self.c.fetchall() == []: 
+            self.c.execute('INSERT INTO medicine (name,dose,price,disease) VALUES (%s,%s,%s,%s)',args)
+            self.db.commit()
+        else:
+            messagebox.showerror(title='Error Occured',message='Medicine Already Exists')
+
 
 
 if __name__ == "__main__":
     ms = MySQL(host='localhost',user='root',db='hms',pw='12345678')
-    ms.start_new()
-    # print(ms.search_doc(table="doctor",ppin=1))
-    # print(ms.add_doc())
-    # print(ms.free_doc())
+    ms.add_med('Aptio',"1",2000,'xyz')

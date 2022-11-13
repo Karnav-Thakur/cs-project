@@ -217,7 +217,6 @@ class Patient:
         canvas.create_window(screenwidth//2,y+20*gap,window=ok_button)
 
         visited_before = tk.Checkbutton(window,text='Visited Before',onvalue=1,offvalue=0,variable=intvar,height=1,width=20)
-        print(intvar.get())
         canvas.create_window(screenwidth//2,y+21*gap,window=visited_before)
         
         
@@ -486,25 +485,64 @@ class Prescription:
             if result == [] or not result:
                 messagebox.showerror(title='Error Occured',message='No Medicine with that disease was found, please enter the medicine name in the database')
             else:
-                rows = len(result)
-                columns = len(result[0])
+                disease  = tk.Label(window,text=dis_box.get('1.0','end-1c').title())
+                canvas.create_window(screenwidth//2,y+3*gap,window=disease)
 
-                for i in range(rows):
-                    for j in range(columns):
-                        
-                        table = tk.Entry(window, width=20, fg='blue',
-                                    font=('Arial',16,'bold'))
-                        
+                for index,i in enumerate(result):
+                    meds = tk.Label(window,text=i[1])
+                    canvas.create_window(screenwidth//2,y+(index+4)*gap,window=meds)
 
 
-                        table.grid(row=i, column=j,sticky=tk.NSEW)
-                        # canvas.create_window(0,y+2*gap,row=)
-                        table.insert(tk.END, result[i][j])
         
         ok_button = tk.Button(window,text='Suggest',command=cmd)
         canvas.create_window(screenwidth//2,y+2*gap,window=ok_button)
+
+    def add_meds(self):
+        label = tk.Label(window,text='Enter the following information')
+        canvas.create_window(screenwidth//2,y,window=label)
         
+        name = tk.Label(window,text='Name of the medicine')
+        canvas.create_window(screenwidth//2,y+gap,window=name)
+
+        name_box = tk.Text(window,width=20,height=1)
+        canvas.create_window(screenwidth//2,y+2*gap,window=name_box)
         
+        dose = tk.Label(window,text='Recommended dose per day')
+        canvas.create_window(screenwidth//2,y+3*gap,window=dose)
+
+        d_box = tk.Text(window,width=20,height=1)
+        canvas.create_window(screenwidth//2,y+4*gap,window=d_box)
+        
+        price = tk.Label(window,text='Price per tablet/bottle')
+        canvas.create_window(screenwidth//2,y+5*gap,window=price)
+        
+        price_box = tk.Text(window,width=20,height=1)
+        canvas.create_window(screenwidth//2,y+6*gap,window=price_box)
+        
+        disease = tk.Label(window,text='Disease Can be cured')
+        canvas.create_window(screenwidth//2,y+7*gap,window=disease)
+
+        disease_box = tk.Text(window,width=20,height=1)
+        canvas.create_window(screenwidth//2,y+8*gap,window=disease_box)
+
+        def cmd():
+            name_box_text = name_box.get('1.0','end-1c').title()
+            d_box_text = d_box.get('1.0','end-1c')
+            price_box_text = int(price_box.get('1.0','end-1c'))
+            disease_box_text = disease_box.get('1.0','end-1c').title()
+
+            args = (name_box_text,d_box_text,price_box_text,disease_box_text)
+            messagebox.showinfo(title='Addition Successful',message='Successfully Added Medidicine in database')
+
+            ms.add_med(*args)
+            clear_item()
+            recover_wid()
+
+        ok_button = tk.Button(window,text='Enter into database',command=cmd)
+        canvas.create_window(screenwidth//2,y+9*gap,window=ok_button)
+
+        
+
 
 class Report(Patient):
     pass
@@ -611,6 +649,8 @@ def choice(event):
             recover_wid()
             if meths.get() == 'suggest_meds':
                 pres.suggest_meds()
+            elif meths.get() == 'add_meds':
+                pres.add_meds()
 
 
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
