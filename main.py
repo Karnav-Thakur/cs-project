@@ -545,7 +545,7 @@ class Prescription:
         
 
 
-class Report():
+class Report:
     
     def create_report(self):
 
