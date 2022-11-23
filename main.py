@@ -2,8 +2,9 @@ import datetime
 import os
 import tkinter as tk
 from tkinter import messagebox,ttk
-from PIL import Image,ImageTk
+from PIL import Image,ImageTk,ImageDraw,ImageFont
 from helpers import helper
+import textwrap
 
 window = tk.Tk()
 window.attributes('-fullscreen',True)
@@ -190,7 +191,7 @@ class Patient:
             mail_box_text = mail_box.get('1.0','end-1c').title().strip()
             typ_box_text = typ_box.get('1.0','end-1c').title().strip()
             disease_box_text = disease_box.get('1.0','end-1c').title().strip()
-            visit_box_text = datetime.datetime.strptime(visit_box.get('1.0','end-1c').strip(),'%d/%m/%Y')
+            visit_box_text = str(datetime.datetime.strptime(visit_box.get('1.0','end-1c').strip(),'%d/%m/%Y'))
             visited_before = intvar.get()
 
             data = [first_name_box_text,last_name_box_text,age_box_text,gender_box_text,pn_box_text,mail_box_text,typ_box_text,disease_box_text,visit_box_text]
@@ -544,8 +545,59 @@ class Prescription:
         
 
 
-class Report(Patient):
-    pass
+class Report():
+    
+    def create_report(self):
+
+        fname = tk.Label(window,text='Enter first name of patient')
+        canvas.create_window(screenwidth//2,y+gap,window=fname)
+        
+        fname_box = tk.Text(window,width=20,height=1)
+        canvas.create_window(screenwidth//2,y+2*gap,window=fname_box)
+
+        lname = tk.Label(window,text='Enter last name of patient')
+        canvas.create_window(screenwidth//2,y+3*gap,window=lname)
+        
+        lname_box = tk.Text(window,width=20,height=1)
+        canvas.create_window(screenwidth//2,y+4*gap,window=lname_box)
+
+
+            
+        def cmd():
+            name = ms.search_patient(fname_box.get('1.0','end-1c').strip(),lname_box.get('1.0','end-1c').strip())
+            print(name)
+    
+            if name == []:
+                messagebox.showerror(title="Error Occured",message='No Patient with that name found')
+                return
+
+            name = name[0]        
+
+            img = Image.open('./templates/template.png')
+
+            I1 = ImageDraw.Draw(img)
+            font = ImageFont.truetype('./templates/times.ttf',24)
+
+
+
+            I1.text((300,27),f"{name[1]} {name[2]} ({name[4]})",fill=(0,0,0),font=font) # this is name column
+            I1.text((280,60),f"{name[3]}",fill=(0,0,0),font=font) # this is age column
+            I1.text((400,93),f"{name[5]}",fill=(0,0,0),font=font) # this is mobile phone column
+            I1.text((150,182),f"{name[8]}",fill=(0,0,0),font=font) # this is diagnosis column
+            I1.text((25,300),f"{ms.suggest_medicine(name[8].lower())[0][1]}",fill=(0,0,0),font=font) # this is medicine coloumn
+            I1.text((300,300),"1-0-1",fill=(0,0,0),font=font) # this is dosage column
+            I1.text((550,300),"Daily",fill=(0,0,0),font=font) # this is freq column
+            img.show(title="Report")
+
+            
+
+
+        
+        ok_button = tk.Button(window,text='Search',command=cmd)
+        canvas.create_window(screenwidth//2,y+5*gap,window=ok_button)
+
+        
+
 
 
 class Tests:
@@ -653,6 +705,24 @@ def choice(event):
                 pres.add_meds()
 
 
+        methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
+        canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
+
+    elif stringvar.get() == 'Report':
+        rep = Report()
+
+        methods = [attr for attr in dir(rep) if attr.startswith('__') is False]
+        
+        meths = tk.StringVar(window,methods[0])
+
+        def cho(event):
+            clear_item()
+            recover_wid()
+            if meths.get() == 'create_report':
+                rep.create_report()
+            # elif meths.get() == 'add_meds':
+            #     pres.add_meds()
+        
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
         canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)
 

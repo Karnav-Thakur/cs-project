@@ -44,6 +44,7 @@ class MySQL:
         return data
 
     def search_patient(self,*name):
+        print(name)
         self.c.execute('SELECT * FROM patient WHERE first_name= %s AND last_name = %s',name)
         data = []
         for x in self.c:
