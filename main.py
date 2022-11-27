@@ -468,9 +468,6 @@ class Admin:
         ok_button = tk.Button(window,text='Login',command=cmd)
         canvas.create_window(screenwidth//2,y+2*gap,window=ok_button)
         
-
-
-
 class Prescription:
     def suggest_meds(self):
         dis = tk.Label(window,text='Enter Disease')
@@ -541,10 +538,7 @@ class Prescription:
 
         ok_button = tk.Button(window,text='Enter into database',command=cmd)
         canvas.create_window(screenwidth//2,y+9*gap,window=ok_button)
-
-        
-
-
+    
 class Report:
     
     def create_report(self):
@@ -595,15 +589,6 @@ class Report:
         
         ok_button = tk.Button(window,text='Search',command=cmd)
         canvas.create_window(screenwidth//2,y+5*gap,window=ok_button)
-
-        
-
-
-
-class Tests:
-    def __init__(self,name):
-        self.name = name
-
 
 
 def winquit():
@@ -720,8 +705,6 @@ def choice(event):
             recover_wid()
             if meths.get() == 'create_report':
                 rep.create_report()
-            # elif meths.get() == 'add_meds':
-            #     pres.add_meds()
         
         methods_drop = tk.OptionMenu(window,meths,*methods,command=cho)
         canvas.create_window(screenwidth//2,dropdown.winfo_height()+50,window=methods_drop)

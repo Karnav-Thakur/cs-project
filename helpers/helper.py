@@ -7,7 +7,6 @@ class MySQL:
     def __init__(self,host,user,db,pw):
         self.db = mysql.connector.connect(host=host,user=user,passwd=pw,database=db)
         self.c = self.db.cursor()
-
     def start_new(self):
         try:
             self.c.execute('CREATE TABLE patient (id int PRIMARY KEY AUTO_INCREMENT, first_name VARCHAR(45), last_name VARCHAR(45), age int, gender VARCHAR(45), phone_number bigint, email VARCHAR(45), type VARCHAR(45), disease VARCHAR(45),last_visit date);') # patient table
@@ -146,5 +145,11 @@ class MySQL:
 
 
 if __name__ == "__main__":
-    ms = MySQL(host='localhost',user='root',db='hms',pw='12345678')
-    ms.add_med('Aptio',"1",2000,'xyz')
+    def main():
+        try:
+            ms = MySQL(host='localhost',user='root',db='hms',pw='12345678')
+        except:
+            print('Make a database first')
+            return
+        ms.add_med('Aptio',"1",2000,'xyz')
+main()
