@@ -151,5 +151,5 @@ if __name__ == "__main__":
         except:
             print('Make a database first')
             return
-        ms.add_med('Aptio',"1",2000,'xyz')
-main()
+
+    main()
